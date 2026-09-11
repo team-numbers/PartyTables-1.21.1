@@ -29,6 +29,7 @@ public final class PartyTables {
 
         ModItems.register(modEventBus);
 
+        ModCreativeModeTabs.register(modEventBus);
         ModAttachments.register(modEventBus);
     }
 
