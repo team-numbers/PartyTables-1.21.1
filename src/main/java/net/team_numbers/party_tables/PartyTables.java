@@ -9,6 +9,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.team_numbers.party_tables.attachment.ModAttachments;
 import net.team_numbers.party_tables.block.ModBlocks;
 import net.team_numbers.party_tables.block.entity.ModBlockEntities;
+import net.team_numbers.party_tables.data.ModDataGen;
 import net.team_numbers.party_tables.game.GameRuleRegistry;
 import net.team_numbers.party_tables.game.UnoRule;
 import net.team_numbers.party_tables.item.ModItems;
@@ -31,6 +32,8 @@ public final class PartyTables {
 
         ModCreativeModeTabs.register(modEventBus);
         ModAttachments.register(modEventBus);
+
+        modEventBus.addListener(ModDataGen::gatherData);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
