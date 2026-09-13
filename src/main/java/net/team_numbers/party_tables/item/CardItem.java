@@ -43,7 +43,7 @@ public class CardItem extends Item {
             var selfCards = tag.getList("Cards", Tag.TAG_STRING);
 
             if (itemstack.isEmpty()) {
-                if (!selfCards.isEmpty()) {
+                if (selfCards.size() > 1) {
                     String card = selfCards.removeLast().getAsString();
                     ItemStack newStack = onlyType(this.getDefaultInstance(), selfType, card);
                     slot.safeInsert(newStack);

@@ -12,10 +12,13 @@ public interface ModTranslations {
 
 
     ModTranslations EN_US = p -> {
+        p.add("itemGroup." + PartyTables.MOD_ID, "Cardist");
+
         p.addItem(ModItems.CARD, "Card");
     };
 
     ModTranslations JA_JP = p -> {
+        p.add("itemGroup." + PartyTables.MOD_ID, "Cardist");
 
         p.addItem(ModItems.CARD, "カード");
     };
