@@ -12,11 +12,20 @@ public final class ModAttachments {
 
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = ModRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES);
 
+    public static final Supplier<AttachmentType<_CardHand>> _CARD_HAND =
+        ATTACHMENT_TYPES.register("card_hand_", () ->
+            AttachmentType.builder((Supplier<_CardHand>) _CardHand::new)
+                .serialize(_CardHand.CODEC)
+                .build()
+        );
+
     public static final Supplier<AttachmentType<CardHand>> CARD_HAND =
         ATTACHMENT_TYPES.register("card_hand", () ->
-            AttachmentType.builder((Supplier<CardHand>)CardHand::new)
-                .serialize(CardHand.CODEC)
-                .build()
+            AttachmentType.builder(CardHand.SIMPLE_FACTORY).sync(
+                (holder, player) -> {
+                    return true;
+                }, CardHand.STREAM_CODEC
+            ).build()
         );
 
     public static void register(IEventBus bus) {

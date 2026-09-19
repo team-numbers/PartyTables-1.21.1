@@ -1,6 +1,6 @@
 package net.team_numbers.party_tables.client;
 
-import net.team_numbers.party_tables.attachment.CardHand;
+import net.team_numbers.party_tables.attachment._CardHand;
 
 import java.util.Map;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClientCardGameState {
 
     // 自分自身の手札（フルデータ）
-    private static CardHand ownHand = new CardHand();
+    private static _CardHand ownHand = new _CardHand();
 
     // 他プレイヤーの手札枚数のみ（UUID -> 枚数）
     private static final Map<UUID, Integer> opponentCardCounts = new ConcurrentHashMap<>();
@@ -18,16 +18,16 @@ public class ClientCardGameState {
 
     // ---- 自分の手札 ----
 
-    public static void setOwnHand(CardHand hand) {
+    public static void setOwnHand(_CardHand hand) {
         ownHand = hand;
     }
 
-    public static CardHand getOwnHand() {
+    public static _CardHand getOwnHand() {
         return ownHand;
     }
 
     public static void clearOwnHand() {
-        ownHand = new CardHand();
+        ownHand = new _CardHand();
     }
 
     // ---- 相手の枚数 ----

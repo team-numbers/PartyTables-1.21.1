@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.team_numbers.party_tables.PartyTables;
-import net.team_numbers.party_tables.attachment.CardHand;
+import net.team_numbers.party_tables.attachment._CardHand;
 import net.team_numbers.party_tables.attachment.ModAttachments;
 import net.team_numbers.party_tables.game.CardGameSession;
 import net.team_numbers.party_tables.network.SyncOwnHandPayload;
@@ -79,10 +79,10 @@ public class CardTableBlockEntity extends BlockEntity {
         if (session == null) return;
 
         for (ServerPlayer p : session.getParticipants()) {
-            p.setData(ModAttachments.CARD_HAND, new CardHand());
+            p.setData(ModAttachments._CARD_HAND, new _CardHand());
             // クライアントにも空の手札を通知
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(
-                p, new SyncOwnHandPayload(new CardHand())
+                p, new SyncOwnHandPayload(new _CardHand())
             );
         }
 

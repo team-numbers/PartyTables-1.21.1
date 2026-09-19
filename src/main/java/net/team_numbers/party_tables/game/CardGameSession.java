@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.team_numbers.party_tables.attachment.CardHand;
+import net.team_numbers.party_tables.attachment._CardHand;
 import net.team_numbers.party_tables.attachment.ModAttachments;
 import net.team_numbers.party_tables.block.entity.CardTableBlockEntity;
 import net.team_numbers.party_tables.network.SyncHandCountPayload;
@@ -67,12 +67,12 @@ public abstract class CardGameSession {
         turnIndex = 0;
 
         for (ServerPlayer player : getParticipants()) {
-            CardHand hand = new CardHand();
+            _CardHand hand = new _CardHand();
             for (int i = 0; i < initialHandSize; i++) {
                 Optional<ItemStack> drawn = deck.drawOne();
                 drawn.ifPresent(hand::addCard);
             }
-            player.setData(ModAttachments.CARD_HAND, hand);
+            player.setData(ModAttachments._CARD_HAND, hand);
         }
 
         broadcastHandCounts();
@@ -101,9 +101,9 @@ public abstract class CardGameSession {
         if (drawnOpt.isEmpty()) return ItemStack.EMPTY;
 
         ItemStack drawn = drawnOpt.get();
-        CardHand hand = player.getData(ModAttachments.CARD_HAND);
+        _CardHand hand = player.getData(ModAttachments._CARD_HAND);
         hand.addCard(drawn);
-        player.setData(ModAttachments.CARD_HAND, hand);
+        player.setData(ModAttachments._CARD_HAND, hand);
 
         // 本人にフル同期
         PacketDistributor.sendToPlayer(
@@ -151,7 +151,7 @@ public abstract class CardGameSession {
     public List<SyncHandCountPayload.Entry> buildCountEntries() {
         List<SyncHandCountPayload.Entry> entries = new ArrayList<>();
         for (ServerPlayer p : getParticipants()) {
-            CardHand hand = p.getData(ModAttachments.CARD_HAND);
+            _CardHand hand = p.getData(ModAttachments._CARD_HAND);
             entries.add(new SyncHandCountPayload.Entry(p.getUUID(), hand.size()));
         }
         return entries;
