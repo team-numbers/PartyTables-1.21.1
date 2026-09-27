@@ -8,6 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -21,7 +22,10 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.team_numbers.party_tables.attachment.ModAttachments;
+import net.team_numbers.party_tables.network.ModNetworking;
+import net.team_numbers.party_tables.network.payload.OpenScreenHandPayload;
 
 import java.util.List;
 
@@ -37,16 +41,18 @@ public class CardItem extends Item {
         var cardHand = player.getData(ModAttachments.CARD_HAND);
 
         if (usedHand == InteractionHand.MAIN_HAND) {
-//            if (!level.isClientSide) {
-            if (true) {
+            if (!level.isClientSide) {
                 if (cardHand.toggleShow()) {
                     cardHand.set(itemstack);
                 } else {
                     cardHand.resetCards();
                 }
+                player.syncData(ModAttachments.CARD_HAND);
+                if (player instanceof ServerPlayer serverPlayer) {
+                    PacketDistributor.sendToPlayer(serverPlayer, new OpenScreenHandPayload());
+                }
             }
-//            return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide);
-            return InteractionResultHolder.success(itemstack);
+            return InteractionResultHolder.sidedSuccess(itemstack, level.isClientSide);
         }
         return InteractionResultHolder.pass(itemstack);
     }

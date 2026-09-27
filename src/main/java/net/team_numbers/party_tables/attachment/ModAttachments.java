@@ -21,11 +21,7 @@ public final class ModAttachments {
 
     public static final Supplier<AttachmentType<CardHand>> CARD_HAND =
         ATTACHMENT_TYPES.register("card_hand", () ->
-            AttachmentType.builder(CardHand.SIMPLE_FACTORY).sync(
-                (holder, player) -> {
-                    return true;
-                }, CardHand.STREAM_CODEC
-            ).build()
+            AttachmentType.builder(CardHand.SIMPLE_FACTORY).sync(CardHand.STREAM_CODEC).build()
         );
 
     public static void register(IEventBus bus) {

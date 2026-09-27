@@ -5,6 +5,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.team_numbers.party_tables.PartyTables;
+import net.team_numbers.party_tables.network.payload.OpenScreenHandPayload;
 
 @EventBusSubscriber(modid = PartyTables.MOD_ID)
 public class ModNetworking {
@@ -37,6 +38,12 @@ public class ModNetworking {
             SyncHandCountPayload.TYPE,
             SyncHandCountPayload.STREAM_CODEC,
             ClientPayloadHandler::handleSyncHandCount
+        );
+
+        registrar.playToClient(
+            OpenScreenHandPayload.TYPE,
+            OpenScreenHandPayload.STREAM_CODEC,
+            ClientPayloadHandler::handleOpenScreenHand
         );
     }
 }
