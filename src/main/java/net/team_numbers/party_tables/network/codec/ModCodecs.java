@@ -1,9 +1,13 @@
 package net.team_numbers.party_tables.network.codec;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.VarInt;
 import net.minecraft.network.codec.StreamCodec;
+import net.neoforged.neoforge.common.util.FriendlyByteBufUtil;
 
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.BiFunction;
 
 public class ModCodecs {
@@ -30,5 +34,16 @@ public class ModCodecs {
             }
         };
     }
+    public static final StreamCodec<ByteBuf, OptionalInt> OPTIONAL_INT = new StreamCodec<>() {
+        public OptionalInt decode(ByteBuf b) {
+            return b.readBoolean() ? OptionalInt.of(b.readInt()) : OptionalInt.empty();
+        }
 
+        public void encode(ByteBuf b, OptionalInt e) {
+            b.writeBoolean(e.isPresent());
+            if (e.isPresent()) {
+                b.writeInt(e.getAsInt());
+            }
+        }
+    };
 }

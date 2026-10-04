@@ -1,9 +1,8 @@
 package net.team_numbers.party_tables.network;
 
-import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.team_numbers.party_tables.client.ClientCardGameState_;
-import net.team_numbers.party_tables.client.gui.CardHandScreen;
+import net.team_numbers.party_tables.client.ModClientHandler;
 import net.team_numbers.party_tables.network.payload.OpenScreenHandPayload;
 
 public class ClientPayloadHandler {
@@ -32,7 +31,7 @@ public class ClientPayloadHandler {
 
     public static void handleOpenScreenHand(OpenScreenHandPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            Minecraft.getInstance().setScreen(new CardHandScreen());
+            ModClientHandler.openCardHand();
         });
     }
 }

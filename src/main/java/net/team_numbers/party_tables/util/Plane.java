@@ -14,13 +14,14 @@ public record Plane(Vec3 a, Vec3 b, Vec3 c, Vec3 d) {
         return new Plane(new Vec3(a), new Vec3(b), new Vec3(c), new Vec3(d));
     }
 
-    public static Plane ofXY(Vec3 pos, float xSize, float ySize, Vec3 rotPos, Quaternionf rotation) {
+    public static Plane ofXY(Vec3 pos, float xSize, float ySize, Vec3 rotPos, Quaternionf rotation, Vec3 offset) {
         float xh = xSize / 2.0F;
         float yh = ySize / 2.0F;
         var mat = new Matrix4f();
         mat.translate(rotPos.reverse().toVector3f());
         mat.rotate(rotation);
         mat.translate(rotPos.toVector3f());
+        mat.translate(offset.toVector3f());
         var a = new Vector4f((float)pos.x - xh, (float)pos.y - yh, (float)pos.z, 1F).mulProject(mat, new Vector3f());
         var b = new Vector4f((float)pos.x + xh, (float)pos.y - yh, (float)pos.z, 1F).mulProject(mat, new Vector3f());
         var c = new Vector4f((float)pos.x + xh, (float)pos.y + yh, (float)pos.z, 1F).mulProject(mat, new Vector3f());

@@ -1,21 +1,26 @@
 package net.team_numbers.party_tables.attachment;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.mojang.math.Axis;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.team_numbers.party_tables.client.CardInfo;
 import net.team_numbers.party_tables.item.CardItem;
 import net.team_numbers.party_tables.network.codec.ModCodecs;
 import net.team_numbers.party_tables.util.Plane;
-import net.team_numbers.party_tables.util.RotatablePlane;
 
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 public class CardHand {
 
@@ -29,29 +34,40 @@ public class CardHand {
     // ネットワーク送信用（本人にフル送信する時に使う）
     public static final StreamCodec<RegistryFriendlyByteBuf, CardHand> STREAM_CODEC =
         StreamCodec.composite(
-            ModCodecs.entry(Map::entry, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.STRING_UTF8).apply(ByteBufCodecs.list()),
+            CardSlot.STREAM_CODEC.apply(ByteBufCodecs.list()),
             h -> h.cards,
             ByteBufCodecs.BOOL,
             h -> h.show,
+            ByteBufCodecs.map(HashBiMap::create, ByteBufCodecs.STRING_UTF8, ByteBufCodecs.INT),
+            h -> h.select,
             CardHand::new
         );
 
     public static final Supplier<CardHand> SIMPLE_FACTORY = CardHand::new;
 
-    private final List<Map.Entry<String, String>> cards;
+    private final List<CardSlot> cards;
     private boolean show;
+    private final BiMap<String, Integer> select;
 
-    public CardHand(List<Map.Entry<String, String>> cards, boolean show) {
+    private CardHand(List<CardSlot> cards, boolean show, BiMap<String, Integer> select) {
         this.cards = cards;
         this.show = show;
+        this.select = select;
     }
 
     public CardHand() {
         this.cards = Lists.newArrayList();
+        this.select = HashBiMap.create();
     }
 
-    public List<Map.Entry<String, String>> getCards() {
-        return this.cards;
+    public List<CardInfo> getCards() {
+        var indexMap = select.inverse();
+        return IntStream.range(0, cards.size())
+            .mapToObj(i -> {
+                var entry = cards.get(i);
+                String name = indexMap.get(i);
+                return new CardInfo(entry.type(), entry.card(), entry.moveDist(), name);
+            }).toList();
     }
 
     public List<Plane> cardPlanes(Vec3 pos) {
@@ -63,20 +79,26 @@ public class CardHand {
         int n = this.cards.size();
         if (n > 0) {
             int i = 0;
-            float totalAngle = 150F;
-            float startAngle = -totalAngle / 2F;
-            for (Map.Entry<String, String> entry : cards) {
-                float angle;
-                if (n > 1) {
-                    angle = startAngle + (totalAngle / n - 1) * i;
-                } else {
-                    angle = 0;
-                }
-                planes.add(Plane.ofXY(pos, width, height, rot, Axis.ZP.rotation(Mth.DEG_TO_RAD * angle)));
+            for (var entry : cards) {
+                float angle = getAngle(i, n);
+                planes.add(Plane.ofXY(
+                    pos, width, height, rot, Axis.ZP.rotation(Mth.DEG_TO_RAD * angle),
+                    new Vec3(0, -entry.moveDist / 100.0F, 0))
+                );
                 ++i;
             }
         }
         return planes;
+    }
+
+    public static float getAngle(int index, int n) {
+        float totalAngle = 150F;
+        float startAngle = -totalAngle / 2F;
+        if (n > 1) {
+            return startAngle + (totalAngle / n - 1) * index;
+        } else {
+            return  0;
+        }
     }
 
     public int getCardCount() {
@@ -87,20 +109,51 @@ public class CardHand {
         return this.cards.isEmpty();
     }
 
-    public void resetCards() {
-        this.cards.clear();
-    }
-
-    public boolean toggleShow() {
-        this.show = !this.show;
-        System.out.println(this.show ? "Showing" : "Hiding");
-        return this.show;
-    }
-
-    public void set(ItemStack itemStack) {
+    public void show(ItemStack itemStack) {
+        this.show = true;
         var data = CardItem.get(itemStack);
         data.forEach((card) -> {
-            this.cards.add(Map.entry(card.type(), card.card()));
+            this.cards.add(new CardSlot(card.type(), card.card(), 0));
         });
+    }
+
+    public void hide() {
+        this.show = false;
+        this.cards.clear();
+        this.select.clear();
+    }
+
+    public Map.Entry<String, String> pick(int index) {
+        var card = this.cards.remove(index);
+        return Map.entry(card.type(), card.card());
+    }
+
+    public void append(String type, String card) {
+        this.cards.add(new CardSlot(type, card, 0));
+    }
+
+    public void pickCardSlide(int index, double moveDist) {
+        this.cards.set(index, this.cards.get(index).move(moveDist));
+    }
+
+    public void selectOrUnselect(String name, OptionalInt index) {
+        this.select.compute(name, (k, oldValue) -> index.isPresent() ? index.getAsInt() : null);
+    }
+
+    record CardSlot(String type, String card, double moveDist) {
+        public static final StreamCodec<ByteBuf, CardSlot> STREAM_CODEC =
+            StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8,
+                CardSlot::type,
+                ByteBufCodecs.STRING_UTF8,
+                CardSlot::card,
+                ByteBufCodecs.DOUBLE,
+                CardSlot::moveDist,
+                CardSlot::new
+            );
+
+        public CardSlot move(double moveDist) {
+            return new CardSlot(type, card, moveDist);
+        }
     }
 }

@@ -14,7 +14,7 @@ public final class CardRayCasts {
 
     public static Optional<SelectCard> rayCardPlayers(Level level, Player owner, Ray ray) {
         var list = level.getNearbyPlayers(
-            TargetingConditions.forNonCombat(),
+            TargetingConditions.forCombat(),
             owner,
             owner.getBoundingBox().inflate(6F, 4F, 6F)
         );
@@ -39,7 +39,7 @@ public final class CardRayCasts {
         for (var plane : planes.reversed()) {
             var pos = plane.rot(rot).scale(0.9375F).add(player.position().add(0F, 1.501F, 0F));
             if (pos.clip(ray.start(), ray.end()).isPresent()) {
-                return Optional.of(new SelectCard(player, i));
+                return Optional.of(new SelectCard(player, i, planes.size()));
             }
             --i;
         }

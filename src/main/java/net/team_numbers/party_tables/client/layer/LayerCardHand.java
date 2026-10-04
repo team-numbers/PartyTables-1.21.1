@@ -3,8 +3,6 @@ package net.team_numbers.party_tables.client.layer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -15,9 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.team_numbers.party_tables.PartyTables;
 import net.team_numbers.party_tables.attachment.ModAttachments;
-import net.team_numbers.party_tables.client.ClientCardGameState;
 import net.team_numbers.party_tables.util.Plane;
-import org.joml.Vector3f;
 
 public class LayerCardHand<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
 
@@ -55,35 +51,33 @@ public class LayerCardHand<T extends LivingEntity, M extends EntityModel<T>> ext
         for (var plane : planes) {
             var card = cards.get(index);
             int j = -1;
-            if (ClientCardGameState.getSelected() == index) {
-                j = 0xffff0000;
+            if (card.selector() != null) {
+                j = 0xffff4444;
             }
-            renderPlane(matrixStack, bufferIn, card.getKey(), card.getValue(), plane, j, lightIn);
+            renderPlaneBack(matrixStack, bufferIn, card.type(), plane, j, lightIn);
             ++index;
+            matrixStack.translate(0F, 0.0F, -index * 0.001F);
         }
         RenderSystem.depthMask(true);
-
-//        var font = Minecraft.getInstance().font;
-//
-////        int j = (int)(255.0F) << 24;
-//        int i = 0;
-//        int j = cardHand.getCardCount();
-//        for (var card : cardHand.getCards()) {
-////            font.drawInBatch(card, 0, i * 8, 0xFFFFFFFF, false, matrixStack.last().pose(), bufferIn, Font.DisplayMode.NORMAL, j, lightIn);
-//            renderCard(matrixStack, bufferIn, card.getKey(), card.getValue(), i, j, lightIn);
-//            ++i;
-//        }
         matrixStack.popPose();
     }
 
-    private void renderPlane(PoseStack poseStack, MultiBufferSource buffer, String type, String card, Plane plane, int color, int light) {
-        var vc = buffer.getBuffer(RenderType.entityCutoutNoCull(PartyTables.id("textures/card/" + type + "_front_" + card.toLowerCase() + ".png")));
+    public static void renderPlaneBack(PoseStack poseStack, MultiBufferSource buffer, String type, Plane plane, int color, int light) {
+        renderPlane(poseStack, buffer, type + "_back", plane, color, light);
+    }
+
+    public static void renderPlaneFront(PoseStack poseStack, MultiBufferSource buffer, String type, String card, Plane plane, int color, int light) {
+        renderPlane(poseStack, buffer, type + "_front_" + card.toLowerCase(), plane, color, light);
+    }
+
+    public static void renderPlane(PoseStack poseStack, MultiBufferSource buffer, String texture, Plane plane, int color, int light) {
+        var vc = buffer.getBuffer(RenderType.entityCutoutNoCull(PartyTables.id("textures/card/" + texture + ".png")));
         PoseStack.Pose pose = poseStack.last();
 
-        this.vertexWithColor(pose, vc, plane.a(), 0F, 0F, color, light, -1, 0, 0);
-        this.vertexWithColor(pose, vc, plane.b(), 1F, 0F, color, light, -1, 0, 0);
-        this.vertexWithColor(pose, vc, plane.c(), 1F, 1F, color, light, -1, 0, 0);
-        this.vertexWithColor(pose, vc, plane.d(), 0F, 1F, color, light, -1, 0, 0);
+        vertexWithColor(pose, vc, plane.a(), 0F, 0F, color, light, -1, 0, 0);
+        vertexWithColor(pose, vc, plane.b(), 1F, 0F, color, light, -1, 0, 0);
+        vertexWithColor(pose, vc, plane.c(), 1F, 1F, color, light, -1, 0, 0);
+        vertexWithColor(pose, vc, plane.d(), 0F, 1F, color, light, -1, 0, 0);
     }
 
     private void renderCard(PoseStack poseStack, MultiBufferSource buffer, String type, String card, int index, int count, int light) {
@@ -112,7 +106,7 @@ public class LayerCardHand<T extends LivingEntity, M extends EntityModel<T>> ext
         poseStack.popPose();
     }
 
-    private void vertexWithColor(
+    private static void vertexWithColor(
                         PoseStack.Pose pose, VertexConsumer consumer,
                         Vec3 pos, float u, float v, int color, int light,
                         int normalX,

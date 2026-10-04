@@ -57,12 +57,32 @@ neoForge {
             client()
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('run/client/Dev')
+        }
+        clientMurachiki27 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArguments.addAll '--username', 'Murachiki27', '--uuid', '41b4e0c3c4894b5c988dfadf4899278b'
+            gameDirectory = project.file('run/client/Murachiki27')
+        }
+        clientNotch {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArguments.addAll '--username', 'Notch', '--uuid', '069a79f444e94726a5befca90e38aaf5'
+            gameDirectory = project.file('run/client/Notch')
+        }
+        clientDev1 {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            programArguments.addAll '--username', 'Dev1'
+            gameDirectory = project.file('run/client/Dev1')
         }
 
         server {
             server()
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('run/server/Dev')
         }
         // This run config launches GameTestServer and runs all registered gametests, then exits.
         // By default, the server will crash when no gametests are provided.
@@ -70,6 +90,7 @@ neoForge {
         gameTestServer {
             type = "gameTestServer"
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+            gameDirectory = project.file('run/server/GameTest')
         }
 
         data {
@@ -79,6 +100,7 @@ neoForge {
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+            gameDirectory = project.file('run/data')
         }
 
         // applies to all the run configs above

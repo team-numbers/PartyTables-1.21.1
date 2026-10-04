@@ -1,12 +1,17 @@
 package net.team_numbers.party_tables.network;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.team_numbers.party_tables.attachment._CardHand;
 import net.team_numbers.party_tables.attachment.ModAttachments;
 import net.team_numbers.party_tables.game.CardGameSession;
+import net.team_numbers.party_tables.network.payload.OpenScreenHandPayload;
+import net.team_numbers.party_tables.network.payload.SCloseCardHandPayload;
+import net.team_numbers.party_tables.network.payload.SSelectCardPayload;
 
 public class ServerPayloadHandler {
 
@@ -44,6 +49,30 @@ public class ServerPayloadHandler {
 
             session.broadcastHandCounts();
             session.broadcastFieldState();
+        });
+    }
+
+    public static void handleSelectCard(SSelectCardPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+
+            Entity entity = player.level().getEntity(payload.entityId());
+            if (entity instanceof LivingEntity living) {
+                System.out.println("Server:" + living.getName().getString() + ", " + payload.index());
+                var cardData = living.getData(ModAttachments.CARD_HAND);
+                cardData.selectOrUnselect(living.getName().getString(), payload.index());
+                living.syncData(ModAttachments.CARD_HAND);
+            }
+        });
+    }
+
+    public static void handleCloseCardHand(SCloseCardHandPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+
+            var cardData = player.getData(ModAttachments.CARD_HAND);
+            cardData.hide();
+            player.syncData(ModAttachments.CARD_HAND);
         });
     }
 }

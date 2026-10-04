@@ -42,11 +42,7 @@ public class CardItem extends Item {
 
         if (usedHand == InteractionHand.MAIN_HAND) {
             if (!level.isClientSide) {
-                if (cardHand.toggleShow()) {
-                    cardHand.set(itemstack);
-                } else {
-                    cardHand.resetCards();
-                }
+                cardHand.show(itemstack);
                 player.syncData(ModAttachments.CARD_HAND);
                 if (player instanceof ServerPlayer serverPlayer) {
                     PacketDistributor.sendToPlayer(serverPlayer, new OpenScreenHandPayload());
